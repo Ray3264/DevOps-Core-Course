@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.vs/
+*.slnx
+*.pyproj
+*.pyproj.user
+
+# OS
+.DS_Store
+
+# Coverage files
+.coverage
+htmlcov/
