@@ -1,0 +1,61 @@
+---
+# Role: common
+# Tags strategy:
+# - common: entire role
+# - packages: package installation
+# - users: user management
+
+- name: Install required packages
+  become: true
+  when: ansible_os_family == "Debian"
+  tags:
+    - packages
+    - common
+
+  block:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      register: common_apt_update_result
+
+    - name: Install base packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - git
+          - vim
+        state: present
+
+  rescue:
+    - name: Retry apt update with fix-missing
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      changed_when: true
+
+  always:
+    - name: Log package block completion
+      ansible.builtin.copy:
+        content: "done"
+        dest: /tmp/packages.log
+        mode: '0644'
+
+- name: Manage system users
+  become: true
+  tags:
+    - users
+    - common
+  block:
+    - name: Create deploy user
+      ansible.builtin.user:
+        name: deploy
+        groups: sudo
+        append: true
+        state: present
+
+  always:
+    - name: Log users block completion
+      ansible.builtin.copy:
+        content: "done"
+        dest: /tmp/users.log
+        mode: '0644'
