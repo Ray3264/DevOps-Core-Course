@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-app
+  labels:
+    app: devops-app
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: devops-app
+  template:
+    metadata:
+      labels:
+        app: devops-app
+    spec:
+      containers:
+        - name: devops-app
+          image: ray326sq/devops-info-python:lab03
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: devops-app-env
+            - secretRef:
+                name: devops-app-credentials
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+              readOnly: true
+            - name: data-volume
+              mountPath: /data
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 3
+      volumes:
+        - name: config-volume
+          configMap:
+            name: devops-app-config
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: devops-app-data
