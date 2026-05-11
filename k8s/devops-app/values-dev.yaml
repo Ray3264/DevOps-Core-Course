@@ -1,0 +1,21 @@
+replicaCount: 1
+app:
+  name: "devops-app-dev"
+  logLevel: "DEBUG"
+
+image:
+  tag: "lab03"
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+  nodePort: 30081
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
